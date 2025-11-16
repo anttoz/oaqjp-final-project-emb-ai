@@ -1,3 +1,4 @@
+import json
 import requests
 
 def emotion_detector(text_to_analyse):
@@ -6,5 +7,13 @@ def emotion_detector(text_to_analyse):
     request_body = { "raw_document": { "text": text_to_analyse } }
 
     response = requests.post(url, json = request_body, headers=headers)
-
-    return response.text
+    response_dict = json.loads(response.text)
+    
+    emotion_scores = response_dict["emotionPredictions"][0]["emotion"]
+    emotion_score_pairs = emotion_scores.items()
+    emotion_score_pair_with_max_score = max(emotion_score_pairs, key=lambda v: v[1])
+    
+    return {
+        **emotion_scores,
+        "dominant_emotion": emotion_score_pair_with_max_score[0]
+    }
